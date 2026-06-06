@@ -41,8 +41,8 @@ nav{
   background:rgba(10,22,32,.75);backdrop-filter:blur(20px);
   border-bottom:1px solid var(--line);
 }
-.logo{font-family:'Anton',sans-serif;font-size:28px;letter-spacing:.15em;color:var(--paper)}
-.logo span{color:var(--cyan)}
+.logo{display:inline-flex;align-items:center;height:36px;line-height:1}
+.logo img{height:100%;width:auto;display:block}
 .nav-links{display:flex;gap:36px;list-style:none}
 .nav-links a{
   color:var(--paper);text-decoration:none;font-size:13px;
@@ -391,8 +391,8 @@ nav{
 /* ===== FOOTER ===== */
 footer{padding:80px 60px 40px;background:var(--ink);border-top:1px solid var(--line)}
 .footer-grid{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:60px;margin-bottom:60px}
-.footer-brand{font-family:'Anton',sans-serif;font-size:48px;letter-spacing:.1em;margin-bottom:16px}
-.footer-brand span{color:var(--cyan)}
+.footer-brand{display:inline-flex;align-items:center;height:64px;margin-bottom:16px;line-height:1}
+.footer-brand img{height:100%;width:auto;display:block}
 .footer-tagline{font-size:13px;color:var(--mute);line-height:1.8}
 .footer h4{font-size:11px;letter-spacing:.3em;color:var(--cyan-light);margin-bottom:20px;text-transform:uppercase}
 .footer-list{list-style:none}
@@ -434,7 +434,7 @@ footer{padding:80px 60px 40px;background:var(--ink);border-top:1px solid var(--l
 <body>
 
 <nav>
-  <div class="logo">A<span>V</span>A</div>
+  <div class="logo"><a href="#" style="display:block;height:100%"><img src="ava_logo.png" alt="AVA - Audio Visual Arts"></a></div>
   <ul class="nav-links">
     <li><a href="#topics">News</a></li>
     <li><a href="#services">Services</a></li>
@@ -698,10 +698,10 @@ footer{padding:80px 60px 40px;background:var(--ink);border-top:1px solid var(--l
 <footer>
   <div class="footer-grid">
     <div>
-      <div class="footer-brand">A<span>V</span>A</div>
+      <div class="footer-brand"><img src="ava_logo.png" alt="AVA - Audio Visual Arts"></div>
       <div class="footer-tagline">
         株式会社エイ・ブイ・エイ<br>
-        Audio + Visual + AVC Systems<br>
+        Audio Visual Arts<br>
         Since 1976, Kobe.
       </div>
     </div>

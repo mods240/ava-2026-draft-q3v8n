@@ -404,10 +404,16 @@ footer{padding:80px 60px 40px;background:var(--ink);border-top:1px solid var(--l
 }
 
 /* ===== RESPONSIVE ===== */
+.sp-br{display:none}
+.pc-br{display:inline}
 @media(max-width:900px){
+  .sp-br{display:block}
+  .pc-br{display:none}
   nav{padding:16px 20px}
   .nav-links{display:none}
   .hero{padding:100px 24px 60px}
+  .hero-tag{display:block;line-height:2}
+  .hero-tag::before{display:block;margin-bottom:12px}
   .hero-meta{display:none}
   .topics,.services,.impact,.works,.contact{padding:80px 24px}
   
@@ -449,10 +455,10 @@ footer{padding:80px 60px 40px;background:var(--ink);border-top:1px solid var(--l
   <div class="hero-bg"></div>
   <div class="hero-grid"></div>
   <div class="hero-content">
-    <div class="hero-tag">SINCE 1976 ／ KOBE → OSAKA → TOKYO</div>
+    <div class="hero-tag">SINCE 1976<br class="sp-br"><span class="pc-br"> ／ </span>神戸、大阪、東京</div>
     <h1 class="display">
       <span class="line l1"><span>映像が、</span></span>
-      <span class="line l2"><span>記憶になる<span class="accent">瞬間</span>を。</span></span>
+      <span class="line l2"><span>記憶になる<br class="sp-br"><span class="accent">瞬間</span>を。</span></span>
     </h1>
     <p class="hero-sub">
       展示会、式典、スタジアム、博覧会。<br>
@@ -518,7 +524,7 @@ footer{padding:80px 60px 40px;background:var(--ink);border-top:1px solid var(--l
   <div class="section-head">
     <div>
       <div class="section-num">/ 02 — SERVICES</div>
-      <h2 class="section-title display">三位一体の<em style="color:var(--cyan)">映像力</em>。</h2>
+      <h2 class="section-title display">三位一体の<br class="sp-br"><em style="color:var(--cyan)">映像力</em>。</h2>
       <div class="section-jp">EVENT × CONTENTS × AVC SYSTEMS</div>
     </div>
   </div>
@@ -671,7 +677,7 @@ footer{padding:80px 60px 40px;background:var(--ink);border-top:1px solid var(--l
 <section class="contact" id="contact">
   <div class="contact-inner">
     <div style="font-family:'Anton',sans-serif;font-size:14px;letter-spacing:.3em;margin-bottom:30px;color:rgba(255,255,255,.7)">/ 05 — CONTACT</div>
-    <h2 class="display">映像で、<br>何を <em>映し出しますか</em>？</h2>
+    <h2 class="display">映像で、<br class="pc-br">何を<br class="sp-br"> <em>映し出しますか</em>？</h2>
     <p class="contact-sub">
       展示会・式典・スタジアム・LEDレンタル — あらゆる映像・音響のご相談に、<span data-years-elapsed>50</span>年の経験で応えます。<br>
       まずはお気軽にお問い合わせください。

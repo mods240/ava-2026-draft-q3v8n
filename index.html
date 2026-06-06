@@ -4,17 +4,17 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>AVA｜株式会社エイ・ブイ・エイ</title>
-  <!-- TODO: 本番公開時にこの行を削除すること -->
-  <meta name="robots" content="noindex, nofollow"> 
+  <!-- TODO: 本番公開時に下記noindex行を削除すること -->
+  <meta name="robots" content="noindex, nofollow">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@400;500;700;800&family=Noto+Sans+JP:wght@300;400;500;700&family=Anton&display=swap" rel="stylesheet">
 <style>
 :root{
-  --ink:#0E1419;        /* Twitter ダーク系 */
+  --ink:#0E1419;
   --ink-2:#14181E;
   --paper:#f4f8fb;
-  --cyan:#1DA1F2;       /* コーポレートカラー：Twitter Blue */
+  --cyan:#1DA1F2;
   --cyan-light:#6FC0F5;
   --cyan-deep:#0C7ABF;
   --mute:#7a8a99;
@@ -145,7 +145,7 @@ nav{
 .topics{padding:140px 60px;background:var(--ink-2);position:relative}
 .section-head{
   display:flex;justify-content:space-between;align-items:flex-end;
-  margin-bottom:80px;padding-bottom:30px;
+  margin-bottom:60px;padding-bottom:30px;
   border-bottom:1px solid var(--line);
 }
 .section-num{
@@ -168,47 +168,105 @@ nav{
 .live-dot{width:8px;height:8px;border-radius:50%;background:var(--cyan-light);animation:pulse 1.5s ease infinite}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
 
+/* === タイル型レイアウト：PC は大1+小4、スマホは縦並び === */
 .topics-grid{
-  display:grid;grid-template-columns:1.5fr 1fr 1fr;gap:24px;
+  display:grid;
+  grid-template-columns:repeat(4, 1fr);
+  grid-template-rows:auto auto;
+  gap:20px;
 }
 .topic-card{
-  position:relative;padding:32px;
-  background:linear-gradient(135deg,rgba(255,255,255,.03),rgba(255,255,255,.01));
+  position:relative;
+  background:linear-gradient(135deg,rgba(255,255,255,.04),rgba(255,255,255,.01));
   border:1px solid var(--line);
   transition:all .4s;cursor:pointer;
-  display:flex;flex-direction:column;justify-content:space-between;
-  min-height:380px;
+  display:flex;flex-direction:column;
   text-decoration:none;color:inherit;
+  overflow:hidden;
+  min-height:200px;
 }
+.topic-card:hover{transform:translateY(-4px);border-color:rgba(29,161,242,.55);box-shadow:0 12px 40px rgba(29,161,242,.15)}
+
+/* 1枚目（最新）を大きく */
 .topic-card.featured{
-  grid-row:span 1;
-  background:linear-gradient(135deg,rgba(29,161,242,.2),rgba(29,161,242,.03));
-  border-color:rgba(29,161,242,.45);
+  grid-column:span 2;
+  grid-row:span 2;
+  background:linear-gradient(135deg,rgba(29,161,242,.18),rgba(29,161,242,.02));
+  border-color:rgba(29,161,242,.4);
+  min-height:480px;
 }
-.topic-card:hover{transform:translateY(-4px);border-color:rgba(29,161,242,.65)}
+
+.topic-thumb{
+  width:100%;
+  aspect-ratio:16/9;
+  background:linear-gradient(135deg,rgba(29,161,242,.15),rgba(29,161,242,.03));
+  background-size:cover;background-position:center;
+  position:relative;
+}
+.topic-card.featured .topic-thumb{aspect-ratio:16/10}
+.topic-thumb::after{
+  content:"";position:absolute;inset:0;
+  background:linear-gradient(180deg,transparent 60%,rgba(0,0,0,.4) 100%);
+}
+
+.topic-body{
+  padding:24px;
+  display:flex;flex-direction:column;
+  flex:1;
+}
+.topic-card.featured .topic-body{padding:32px}
+
+.topic-meta-row{
+  display:flex;align-items:center;gap:12px;
+  margin-bottom:14px;
+}
 .topic-tag{
-  display:inline-block;padding:4px 12px;
-  font-size:10px;letter-spacing:.2em;font-weight:700;
+  display:inline-block;padding:4px 10px;
+  font-size:10px;letter-spacing:.15em;font-weight:700;
   background:var(--cyan);color:white;
-  align-self:flex-start;margin-bottom:20px;
 }
-.topic-tag.news{background:rgba(255,255,255,.1);color:var(--cyan-light)}
-.topic-tag.recruit{background:#f4a261;color:var(--ink)}
 .topic-date{
   font-family:'Anton',sans-serif;font-size:12px;
-  color:var(--mute);letter-spacing:.2em;margin-bottom:12px;
+  color:var(--mute);letter-spacing:.15em;
 }
 .topic-card h3{
-  font-size:24px;line-height:1.4;margin-bottom:16px;
+  font-size:16px;line-height:1.5;margin-bottom:10px;
   font-family:'Shippori Mincho',serif;font-weight:700;
+  color:var(--paper);
+  display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;
+  overflow:hidden;
 }
-.topic-card.featured h3{font-size:32px}
-.topic-card p{font-size:14px;color:rgba(244,248,251,.65);line-height:1.8;margin-bottom:20px}
+.topic-card.featured h3{font-size:30px;margin-bottom:18px;-webkit-line-clamp:3}
+
+.topic-card p{
+  font-size:13px;color:rgba(244,248,251,.6);
+  line-height:1.7;
+  display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;
+  overflow:hidden;
+  margin-bottom:auto;
+}
+.topic-card.featured p{
+  font-size:15px;-webkit-line-clamp:4;line-height:1.9;
+  margin-bottom:20px;
+}
+
 .topic-link{
-  font-size:11px;letter-spacing:.3em;text-transform:uppercase;
-  color:var(--paper);font-weight:700;margin-top:auto;
+  font-size:10px;letter-spacing:.3em;text-transform:uppercase;
+  color:var(--cyan-light);font-weight:700;margin-top:14px;
 }
-.topic-link::after{content:" →";color:var(--cyan-light)}
+.topic-link::after{content:" →"}
+
+.topic-loading,.topic-error{
+  grid-column:1/-1;text-align:center;padding:60px 20px;
+  color:var(--mute);font-size:14px;letter-spacing:.15em;
+}
+.topic-loading::after{
+  content:"...";display:inline-block;animation:dots 1.5s infinite;
+}
+@keyframes dots{0%,20%{content:"."}40%{content:".."}60%,100%{content:"..."}}
+
+.topic-error{color:#ff6b78}
+.topic-error .topic-link{display:inline-block;margin-top:16px;color:var(--cyan-light)}
 
 /* ===== SERVICES ===== */
 .services{padding:140px 60px;background:var(--paper);color:var(--ink)}
@@ -235,9 +293,7 @@ nav{
 }
 
 /* ===== STATS / IMPACT ===== */
-.impact{
-  padding:120px 60px;background:var(--ink);position:relative;overflow:hidden;
-}
+.impact{padding:120px 60px;background:var(--ink);position:relative;overflow:hidden}
 .impact::before{
   content:"AVA";position:absolute;top:50%;left:50%;
   transform:translate(-50%,-50%);
@@ -266,13 +322,8 @@ nav{
 
 /* ===== WORKS ===== */
 .works{padding:140px 60px;background:var(--ink-2)}
-.works-grid{
-  display:grid;grid-template-columns:repeat(3,1fr);gap:24px;
-}
-.work-card{
-  position:relative;aspect-ratio:4/5;overflow:hidden;cursor:pointer;
-  background:#1a1a1a;
-}
+.works-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:24px}
+.work-card{position:relative;aspect-ratio:4/5;overflow:hidden;cursor:pointer;background:#1a1a1a}
 .work-card.wide{grid-column:span 2;aspect-ratio:8/5}
 .work-bg{
   position:absolute;inset:0;
@@ -291,8 +342,7 @@ nav{
 .work-overlay{
   position:absolute;inset:0;padding:30px;
   display:flex;flex-direction:column;justify-content:space-between;
-  background:linear-gradient(180deg,transparent 30%,rgba(0,0,0,.85) 100%);
-  z-index:2;
+  background:linear-gradient(180deg,transparent 30%,rgba(0,0,0,.85) 100%);z-index:2;
 }
 .work-cat{
   font-family:'Anton',sans-serif;font-size:11px;letter-spacing:.3em;
@@ -300,10 +350,7 @@ nav{
   padding:6px 12px;border:1px solid var(--cyan-light);
 }
 .work-title{font-size:22px;font-weight:700;font-family:'Shippori Mincho',serif;line-height:1.4}
-.work-meta{
-  font-size:11px;color:var(--mute);letter-spacing:.2em;margin-top:8px;
-  display:flex;gap:16px;
-}
+.work-meta{font-size:11px;color:var(--mute);letter-spacing:.2em;margin-top:8px;display:flex;gap:16px}
 
 /* ===== CONTACT ===== */
 .contact{
@@ -311,8 +358,7 @@ nav{
   position:relative;overflow:hidden;
 }
 .contact::before{
-  content:"CONTACT";position:absolute;
-  bottom:-80px;left:-20px;
+  content:"CONTACT";position:absolute;bottom:-80px;left:-20px;
   font-family:'Anton',sans-serif;font-size:280px;
   color:rgba(255,255,255,.08);letter-spacing:.05em;line-height:.8;
   pointer-events:none;
@@ -343,14 +389,8 @@ nav{
 .contact-cta:hover{transform:translateX(4px)}
 
 /* ===== FOOTER ===== */
-footer{
-  padding:80px 60px 40px;background:var(--ink);
-  border-top:1px solid var(--line);
-}
-.footer-grid{
-  display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:60px;
-  margin-bottom:60px;
-}
+footer{padding:80px 60px 40px;background:var(--ink);border-top:1px solid var(--line)}
+.footer-grid{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:60px;margin-bottom:60px}
 .footer-brand{font-family:'Anton',sans-serif;font-size:48px;letter-spacing:.1em;margin-bottom:16px}
 .footer-brand span{color:var(--cyan)}
 .footer-tagline{font-size:13px;color:var(--mute);line-height:1.8}
@@ -370,7 +410,15 @@ footer{
   .hero{padding:100px 24px 60px}
   .hero-meta{display:none}
   .topics,.services,.impact,.works,.contact{padding:80px 24px}
-  .topics-grid,.works-grid{grid-template-columns:1fr}
+  
+  /* スマホでは縦に並ぶ */
+  .topics-grid{grid-template-columns:1fr;grid-template-rows:auto;gap:16px}
+  .topic-card.featured{grid-column:span 1;grid-row:span 1;min-height:auto}
+  .topic-card.featured h3{font-size:22px}
+  .topic-card.featured p{-webkit-line-clamp:3;font-size:14px}
+  .topic-card.featured .topic-body{padding:24px}
+  
+  .works-grid{grid-template-columns:1fr}
   .work-card.wide{grid-column:span 1;aspect-ratio:4/5}
   .impact-grid{grid-template-columns:repeat(2,1fr);gap:30px}
   .stat-num{font-size:60px}
@@ -457,40 +505,11 @@ footer{
       <div class="section-jp">トピックス・お知らせ</div>
       <div class="live-badge"><span class="live-dot"></span>BLOG AUTO-SYNC</div>
     </div>
-    <a href="#" class="topic-link">VIEW ALL</a>
+    <a href="#" id="blogAllLink" class="topic-link">VIEW ALL</a>
   </div>
 
   <div class="topics-grid" id="topicsGrid">
-    <!-- 静的サンプル（実運用ではJavaScriptでRSSから自動取得） -->
-    <a href="#" class="topic-card featured">
-      <div>
-        <span class="topic-tag">NEW SERVICE</span>
-        <div class="topic-date">2025.12.20</div>
-        <h3>LED RENTAL<br>SERVICE START.</h3>
-        <p>新たに「高詳細・屋内用LEDビジョン」を導入。最大300インチまで対応、−15°〜+15°の曲面設置が可能なパネルで、自由度の高い空間演出を実現。いまなら特別キャンペーン価格でご提供中。</p>
-      </div>
-      <span class="topic-link">詳細を見る</span>
-    </a>
-
-    <a href="#" class="topic-card">
-      <div>
-        <span class="topic-tag news">NEWS</span>
-        <div class="topic-date">2026.01.01</div>
-        <h3>謹賀新年</h3>
-        <p>映像や造作が生み出す視覚的効果がココロを繋ぎ、皆様の想いが未来へと運ばれていく一年に。本年もどうぞよろしくお願いいたします。</p>
-      </div>
-      <span class="topic-link">続きを読む</span>
-    </a>
-
-    <a href="#" class="topic-card">
-      <div>
-        <span class="topic-tag recruit">RECRUIT</span>
-        <div class="topic-date">2024.08.01</div>
-        <h3>イベント部<br>スタッフ募集中</h3>
-        <p>映像・音響のテクニカルスタッフを募集。アルバイト・インターン・契約・社員。文系理系問わず、経験者優遇。</p>
-      </div>
-      <span class="topic-link">募集要項を見る</span>
-    </a>
+    <div class="topic-loading">最新記事を読み込み中</div>
   </div>
 </section>
 
@@ -716,6 +735,120 @@ footer{
     <div>FOLLOW ON X / @AVA_tweet</div>
   </div>
 </footer>
+
+<!-- ===================================================================
+  はてなブログRSS自動取得スクリプト
+  -------------------------------------------------------------------
+  ▼ 本番公開時の手順:
+  下の BLOG_URL 定数を、AVA公式はてなブログのURLに差し替えるだけ。
+  
+  例: const BLOG_URL = 'https://ava-tech.hatenablog.com';
+  
+  ※ 末尾のスラッシュ「/」は付けてもなくてもOKです
+  ※ RSSは自動的に BLOG_URL + '/rss' で取得します
+=================================================================== -->
+<script>
+// ▼ ここを書き換えるだけで本番のブログに切り替わります
+const BLOG_URL = 'https://avakobe.hatenablog.com'; // AVA公式ブログ
+
+// 表示する最大件数
+const MAX_ITEMS = 5;
+
+// RSS→JSON変換プロキシ（CORS回避のため）
+const PROXY = 'https://api.rss2json.com/v1/api.json?rss_url=';
+
+async function loadTopics(){
+  const grid = document.getElementById('topicsGrid');
+  const allLink = document.getElementById('blogAllLink');
+  const rssUrl = BLOG_URL.replace(/\/$/, '') + '/rss';
+  
+  // 「VIEW ALL」のリンク先をブログTOPに設定
+  allLink.href = BLOG_URL;
+  allLink.target = '_blank';
+  allLink.rel = 'noopener';
+  
+  try {
+    const res = await fetch(PROXY + encodeURIComponent(rssUrl));
+    if(!res.ok) throw new Error('RSS取得に失敗しました');
+    const data = await res.json();
+    
+    if(!data.items || data.items.length === 0){
+      grid.innerHTML = `
+        <div class="topic-error">
+          まだ記事がありません。<br>
+          <a href="${BLOG_URL}" class="topic-link" target="_blank" rel="noopener">ブログを見る</a>
+        </div>`;
+      return;
+    }
+
+    const items = data.items.slice(0, MAX_ITEMS);
+    
+    grid.innerHTML = items.map((item, i) => {
+      const date = new Date(item.pubDate);
+      const dateStr = `${date.getFullYear()}.${String(date.getMonth()+1).padStart(2,'0')}.${String(date.getDate()).padStart(2,'0')}`;
+      
+      // 本文プレビュー生成（HTMLタグ除去）
+      const plainText = (item.description || item.content || '')
+        .replace(/<[^>]+>/g, '')
+        .replace(/\s+/g, ' ')
+        .trim();
+      const previewLen = i === 0 ? 180 : 80; // 1枚目（大）は長め
+      const preview = plainText.substring(0, previewLen) + (plainText.length > previewLen ? '…' : '');
+      
+      // サムネイル画像を本文から抽出
+      const imgMatch = (item.description || item.content || '').match(/<img[^>]+src="([^"]+)"/);
+      const thumb = item.thumbnail || item.enclosure?.link || (imgMatch ? imgMatch[1] : '');
+      const thumbStyle = thumb 
+        ? `style="background-image:url('${thumb}')"` 
+        : '';
+      
+      // タグ判定（カテゴリーから種別を推測）
+      const categories = item.categories || [];
+      let tagLabel = 'POST';
+      const catStr = categories.join(' ').toLowerCase();
+      if(catStr.includes('news') || catStr.includes('お知らせ')) tagLabel = 'NEWS';
+      else if(catStr.includes('event') || catStr.includes('イベント')) tagLabel = 'EVENT';
+      else if(catStr.includes('youtube') || catStr.includes('動画')) tagLabel = 'VIDEO';
+      else if(catStr.includes('twitter') || catStr.includes('x')) tagLabel = 'X POST';
+      else if(catStr.includes('recruit') || catStr.includes('採用')) tagLabel = 'RECRUIT';
+      
+      // 1枚目を大きく表示
+      const cardClass = i === 0 ? 'topic-card featured' : 'topic-card';
+      
+      return `
+        <a href="${item.link}" target="_blank" rel="noopener" class="${cardClass}">
+          ${thumb ? `<div class="topic-thumb" ${thumbStyle}></div>` : ''}
+          <div class="topic-body">
+            <div class="topic-meta-row">
+              <span class="topic-tag">${tagLabel}</span>
+              <span class="topic-date">${dateStr}</span>
+            </div>
+            <h3>${escapeHtml(item.title)}</h3>
+            <p>${escapeHtml(preview)}</p>
+            <span class="topic-link">記事を読む</span>
+          </div>
+        </a>
+      `;
+    }).join('');
+  } catch(err){
+    console.error('Blog RSS Error:', err);
+    grid.innerHTML = `
+      <div class="topic-error">
+        ブログ記事を読み込めませんでした<br>
+        <a href="${BLOG_URL}" class="topic-link" target="_blank" rel="noopener">ブログを直接見る</a>
+      </div>`;
+  }
+}
+
+// HTMLエスケープ（XSS対策）
+function escapeHtml(text){
+  const map = {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'};
+  return String(text).replace(/[&<>"']/g, m => map[m]);
+}
+
+// ページロード時に実行
+loadTopics();
+</script>
 
 </body>
 </html>

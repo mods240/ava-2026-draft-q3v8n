@@ -334,12 +334,40 @@ nav{
   background-size:cover;background-position:center;
   transition:transform .8s;
 }
-.work-card:nth-child(1) .work-bg{background:linear-gradient(135deg,#0D2A47,#0E1419)}
-.work-card:nth-child(2) .work-bg{background:linear-gradient(135deg,#0F2E45,#0E1419)}
-.work-card:nth-child(3) .work-bg{background:linear-gradient(135deg,#102438,#0E1419)}
-.work-card:nth-child(4) .work-bg{background:linear-gradient(135deg,#0A3252,#0E1419)}
-.work-card:nth-child(5) .work-bg{background:linear-gradient(135deg,#0D2138,#0E1419)}
+.work-card:nth-child(1) .work-bg{background-color:#0D2A47}
+.work-card:nth-child(2) .work-bg{background-color:#0F2E45}
+.work-card:nth-child(3) .work-bg{background-color:#102438}
+.work-card:nth-child(4) .work-bg{background-color:#0A3252}
+.work-card:nth-child(5) .work-bg{background-color:#0D2138}
 .work-card:hover .work-bg{transform:scale(1.05)}
+
+/* ===== WORK PHOTO SLIDER ===== */
+.work-slider{
+  position:absolute;inset:0;
+  display:flex;overflow-x:auto;overflow-y:hidden;
+  scroll-snap-type:x mandatory;
+  -webkit-overflow-scrolling:touch;
+  scrollbar-width:none;
+}
+.work-slider::-webkit-scrollbar{display:none}
+.work-slide{
+  flex:0 0 100%;width:100%;height:100%;
+  background-size:cover;background-position:center;
+  scroll-snap-align:start;
+  transition:transform .8s;
+}
+.work-card:hover .work-slide{transform:scale(1.05)}
+.work-dots{
+  position:absolute;bottom:16px;left:50%;transform:translateX(-50%);
+  display:flex;gap:8px;z-index:5;
+}
+.work-dot{
+  width:8px;height:8px;border-radius:50%;
+  background:rgba(255,255,255,.4);
+  border:1px solid rgba(255,255,255,.6);
+  cursor:pointer;transition:all .3s;
+}
+.work-dot.active{background:var(--cyan);border-color:var(--cyan);width:24px;border-radius:4px}
 .work-overlay{
   position:absolute;inset:0;padding:30px;
   display:flex;flex-direction:column;justify-content:space-between;
@@ -662,7 +690,16 @@ footer{padding:80px 60px 40px;background:var(--ink);border-top:1px solid var(--l
     </div>
 
     <div class="work-card wide">
-      <div class="work-bg" style="background-image:url('img/stadium_1.jpeg')"></div>
+      <div class="work-slider" id="stadiumSlider">
+        <div class="work-slide" style="background-image:url('img/stadium_1.jpeg')"></div>
+        <div class="work-slide" style="background-image:url('img/stadium_2.jpeg')"></div>
+        <div class="work-slide" style="background-image:url('img/stadium_3.jpeg')"></div>
+      </div>
+      <div class="work-dots" id="stadiumDots">
+        <div class="work-dot active" data-index="0"></div>
+        <div class="work-dot" data-index="1"></div>
+        <div class="work-dot" data-index="2"></div>
+      </div>
       <div class="work-overlay">
         <span class="work-cat">SPORTS</span>
         <div>
@@ -1056,6 +1093,49 @@ async function loadTopics(){
 }
 
 loadTopics();
+
+// ===== Work Photo Slider =====
+document.querySelectorAll('.work-slider').forEach(slider => {
+  const dots = slider.parentElement.querySelector('.work-dots');
+  if(!dots) return;
+  const dotEls = dots.querySelectorAll('.work-dot');
+  const slides = slider.querySelectorAll('.work-slide');
+  
+  // スクロール位置に応じてドットを更新
+  slider.addEventListener('scroll', () => {
+    const index = Math.round(slider.scrollLeft / slider.offsetWidth);
+    dotEls.forEach((d, i) => d.classList.toggle('active', i === index));
+  });
+  
+  // ドットクリックでスライド移動
+  dotEls.forEach(dot => {
+    dot.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      const idx = parseInt(dot.dataset.index);
+      slider.scrollTo({ left: idx * slider.offsetWidth, behavior: 'smooth' });
+    });
+  });
+  
+  // 自動再生（5秒間隔）
+  let autoPlay = setInterval(() => {
+    const current = Math.round(slider.scrollLeft / slider.offsetWidth);
+    const next = (current + 1) % slides.length;
+    slider.scrollTo({ left: next * slider.offsetWidth, behavior: 'smooth' });
+  }, 5000);
+  
+  // ユーザーが触ったら自動再生を一時停止、3秒後に再開
+  slider.addEventListener('pointerdown', () => {
+    clearInterval(autoPlay);
+    setTimeout(() => {
+      autoPlay = setInterval(() => {
+        const current = Math.round(slider.scrollLeft / slider.offsetWidth);
+        const next = (current + 1) % slides.length;
+        slider.scrollTo({ left: next * slider.offsetWidth, behavior: 'smooth' });
+      }, 5000);
+    }, 3000);
+  });
+});
 </script>
 
 </body>

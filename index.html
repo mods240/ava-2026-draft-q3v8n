@@ -796,8 +796,10 @@ const BLOG_URL = 'https://avakobe.hatenablog.com'; // AVA公式ブログ
 const MAX_ITEMS = 5;
 
 // CORSプロキシ（ブラウザから外部RSSを取得するために必要）
+// キャッシュ回避のためタイムスタンプを付与
+const CACHE_BUSTER = Math.floor(Date.now() / 60000); // 1分ごとに更新
 const CORS_PROXIES = [
-  'https://api.allorigins.win/get?url=',
+  `https://api.allorigins.win/get?url=`,
   'https://api.rss2json.com/v1/api.json?rss_url='
 ];
 
@@ -821,27 +823,48 @@ function escapeHtml(text){
   return String(text).replace(/[&<>"']/g, m => map[m]);
 }
 
-// XMLからテキスト取得ヘルパー
+// XMLからテキスト取得ヘルパー（名前空間対応）
 function getTagText(el, tag){
-  // 名前空間付きタグ(content:encoded等)にも対応
-  const found = el.getElementsByTagName(tag)[0];
+  // 名前空間付きタグ(content:encoded等)に複数の方法で対応
+  let found = el.getElementsByTagName(tag)[0];
+  if(!found && tag.includes(':')){
+    // 名前空間なしで再試行
+    const localName = tag.split(':')[1];
+    found = el.getElementsByTagName(localName)[0];
+  }
+  if(!found){
+    // getElementsByTagNameNS で再試行
+    try {
+      const ns = {
+        'content:encoded': 'http://purl.org/rss/1.0/modules/content/',
+        'dc:date': 'http://purl.org/dc/elements/1.1/'
+      };
+      if(ns[tag]){
+        const localName = tag.split(':')[1];
+        found = el.getElementsByTagNameNS(ns[tag], localName)[0];
+      }
+    } catch(e){}
+  }
   return found ? (found.textContent || '') : '';
 }
 
 // 方法1: alloriginsでRSS XMLを直接取得してパース
 async function fetchViaAllOrigins(rssUrl){
-  const res = await fetch(CORS_PROXIES[0] + encodeURIComponent(rssUrl));
-  if(!res.ok) throw new Error('allorigins fetch failed');
+  const url = CORS_PROXIES[0] + encodeURIComponent(rssUrl) + '&_t=' + CACHE_BUSTER;
+  console.log('[AVA Blog] Fetching RSS via allorigins:', url);
+  const res = await fetch(url);
+  if(!res.ok) throw new Error('allorigins fetch failed: ' + res.status);
   const data = await res.json();
-  if(!data.contents) throw new Error('allorigins empty');
+  if(!data.contents) throw new Error('allorigins empty response');
   
   const parser = new DOMParser();
   const xml = parser.parseFromString(data.contents, 'text/xml');
   const xmlItems = xml.querySelectorAll('item');
+  console.log('[AVA Blog] Found', xmlItems.length, 'items in RSS');
   if(!xmlItems.length) throw new Error('No items in RSS');
   
   const items = [];
-  xmlItems.forEach(el => {
+  xmlItems.forEach((el, idx) => {
     // content:encoded（全文HTML）を優先、なければdescription
     const content = getTagText(el, 'content:encoded') || getTagText(el, 'encoded') || getTagText(el, 'description');
     const link = getTagText(el, 'link');
@@ -851,6 +874,10 @@ async function fetchViaAllOrigins(rssUrl){
     // カテゴリーを収集
     const categories = [];
     el.querySelectorAll('category').forEach(c => categories.push(c.textContent || ''));
+    
+    // デバッグ: 画像検出状況をログ
+    const thumb = extractThumb(content);
+    console.log(`[AVA Blog] Item ${idx}: "${title.substring(0,20)}..." → thumb: ${thumb ? thumb.substring(0,60)+'...' : '(none)'}`);
     
     items.push({ title, link, pubDate, content, categories });
   });
@@ -877,7 +904,7 @@ async function fetchViaRss2Json(rssUrl){
 function extractThumb(htmlContent){
   if(!htmlContent) return '';
   
-  // src="..." と src='...' の両方に対応、data-src も確認
+  // 方法1: src="..." / src='...' / data-src="..." から画像を検索
   const patterns = [
     /<img[^>]+src="([^"]+)"/gi,
     /<img[^>]+src='([^']+)'/gi,
@@ -893,6 +920,15 @@ function extractThumb(htmlContent){
       }
     }
   }
+  
+  // 方法2: はてなfotolife URLを直接検索（imgタグ以外の形式にも対応）
+  const fotolifeMatch = htmlContent.match(/https?:\/\/cdn-ak\.f\.st-hatena\.com\/images\/fotolife\/[^\s"'<>]+\.(?:jpg|jpeg|png|gif|webp)/i);
+  if(fotolifeMatch) return fotolifeMatch[0];
+  
+  // 方法3: はてな画像CDNの別パターン
+  const hatenaImgMatch = htmlContent.match(/https?:\/\/cdn\.image\.st-hatena\.com\/[^\s"'<>]+\.(?:jpg|jpeg|png|gif|webp)/i);
+  if(hatenaImgMatch) return hatenaImgMatch[0];
+  
   return '';
 }
 

@@ -453,8 +453,29 @@ footer{padding:80px 60px 40px;background:var(--ink);border-top:1px solid var(--l
   .work-card.wide{grid-column:span 1;aspect-ratio:4/5}
   .impact-grid{grid-template-columns:repeat(2,1fr);gap:30px}
   .stat-num{font-size:60px}
-  .service-row{grid-template-columns:50px 1fr;gap:16px}
-  .service-row > .service-desc{display:none}
+  .service-row{
+    grid-template-columns:50px 1fr;gap:16px;
+    grid-template-rows:auto auto;
+    position:relative;
+  }
+  .service-row > .service-desc{
+    grid-column:1/-1;
+    max-height:0;overflow:hidden;
+    transition:max-height .4s ease, padding .4s ease, opacity .3s ease;
+    opacity:0;padding:0 0 0 66px;
+    font-size:13px;line-height:1.8;color:#3a4a5a;
+  }
+  .service-row.open > .service-desc{
+    max-height:300px;opacity:1;padding:0 0 8px 66px;
+  }
+  .service-row::after{
+    content:"+";position:absolute;right:0;top:40px;
+    font-family:'Anton',sans-serif;font-size:24px;color:var(--cyan);
+    transition:transform .3s;
+  }
+  .service-row.open::after{
+    transform:rotate(45deg);
+  }
   .section-head{flex-direction:column;align-items:flex-start;gap:12px}
   .footer-grid{grid-template-columns:1fr;gap:40px}
   .contact-grid{grid-template-columns:1fr}
@@ -549,8 +570,8 @@ footer{padding:80px 60px 40px;background:var(--ink);border-top:1px solid var(--l
   <div class="section-head">
     <div>
       <div class="section-num">/ 02 — SERVICES</div>
-      <h2 class="section-title display">三位一体の<br class="sp-br"><em style="color:var(--cyan)">映像力</em>。</h2>
-      <div class="section-jp">EVENT × CONTENTS × AVC SYSTEMS</div>
+      <h2 class="section-title display">目に見えないもの<br class="sp-br"><em style="color:var(--cyan)">全てを可視化</em>する。</h2>
+      <div class="section-jp">VISUALIZE EVERYTHING</div>
     </div>
   </div>
 
@@ -1156,6 +1177,18 @@ document.querySelectorAll('.work-slider').forEach(slider => {
     }, 3000);
   });
 });
+
+// ===== Service Accordion (Mobile) =====
+if(window.innerWidth <= 900){
+  document.querySelectorAll('.service-row').forEach(row => {
+    row.addEventListener('click', () => {
+      document.querySelectorAll('.service-row.open').forEach(r => {
+        if(r !== row) r.classList.remove('open');
+      });
+      row.classList.toggle('open');
+    });
+  });
+}
 </script>
 
 </body>

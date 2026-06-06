@@ -795,11 +795,13 @@ const BLOG_URL = 'https://avakobe.hatenablog.com'; // AVA公式ブログ
 // 表示する最大件数
 const MAX_ITEMS = 5;
 
-// CORSプロキシ（ブラウザから外部RSSを取得するために必要）
-// キャッシュ回避のためタイムスタンプを付与
-const CACHE_BUSTER = Math.floor(Date.now() / 60000); // 1分ごとに更新
-const CORS_PROXIES = [
-  `https://api.allorigins.win/get?url=`,
+// CORSプロキシ：自前プロキシを優先使用（Xserver/Vercel両対応）
+const SELF_PROXIES = [
+  '/api/rss.php?url=',    // Xserver本番用（PHP）
+  '/api/rss?url='         // Vercelプレビュー用（JS）
+];
+const EXTERNAL_PROXIES = [
+  'https://api.allorigins.win/get?url=',
   'https://api.rss2json.com/v1/api.json?rss_url='
 ];
 
@@ -848,34 +850,55 @@ function getTagText(el, tag){
   return found ? (found.textContent || '') : '';
 }
 
-// 方法1: alloriginsでRSS XMLを直接取得してパース
+// 方法1: 自前プロキシ（PHP/JS）でXML取得 - Xserver・Vercel両対応
+async function fetchViaSelfProxy(rssUrl){
+  for(const proxy of SELF_PROXIES){
+    try {
+      const url = proxy + encodeURIComponent(rssUrl);
+      console.log('[AVA Blog] Trying self-proxy:', url);
+      const res = await fetch(url);
+      if(!res.ok) continue;
+      const xmlText = await res.text();
+      if(!xmlText || xmlText.includes('"error"')) continue;
+      console.log('[AVA Blog] Self-proxy success:', proxy);
+      return parseRssXml(xmlText);
+    } catch(e){
+      console.warn('[AVA Blog] Self-proxy failed:', proxy, e.message);
+      continue;
+    }
+  }
+  throw new Error('All self-proxies failed');
+}
+
+// 方法2: alloriginsでRSS XMLを取得してパース
 async function fetchViaAllOrigins(rssUrl){
-  const url = CORS_PROXIES[0] + encodeURIComponent(rssUrl) + '&_t=' + CACHE_BUSTER;
-  console.log('[AVA Blog] Fetching RSS via allorigins:', url);
+  const url = EXTERNAL_PROXIES[0] + encodeURIComponent(rssUrl) + '&_t=' + Date.now();
+  console.log('[AVA Blog] Trying allorigins:', url);
   const res = await fetch(url);
-  if(!res.ok) throw new Error('allorigins fetch failed: ' + res.status);
+  if(!res.ok) throw new Error('allorigins failed: ' + res.status);
   const data = await res.json();
-  if(!data.contents) throw new Error('allorigins empty response');
-  
+  if(!data.contents) throw new Error('allorigins empty');
+  return parseRssXml(data.contents);
+}
+
+// RSS XMLをパースして記事配列を返す共通関数
+function parseRssXml(xmlText){
   const parser = new DOMParser();
-  const xml = parser.parseFromString(data.contents, 'text/xml');
+  const xml = parser.parseFromString(xmlText, 'text/xml');
   const xmlItems = xml.querySelectorAll('item');
   console.log('[AVA Blog] Found', xmlItems.length, 'items in RSS');
   if(!xmlItems.length) throw new Error('No items in RSS');
   
   const items = [];
   xmlItems.forEach((el, idx) => {
-    // content:encoded（全文HTML）を優先、なければdescription
     const content = getTagText(el, 'content:encoded') || getTagText(el, 'encoded') || getTagText(el, 'description');
     const link = getTagText(el, 'link');
     const title = getTagText(el, 'title');
     const pubDate = getTagText(el, 'pubDate') || getTagText(el, 'dc:date');
     
-    // カテゴリーを収集
     const categories = [];
     el.querySelectorAll('category').forEach(c => categories.push(c.textContent || ''));
     
-    // デバッグ: 画像検出状況をログ
     const thumb = extractThumb(content);
     console.log(`[AVA Blog] Item ${idx}: "${title.substring(0,20)}..." → thumb: ${thumb ? thumb.substring(0,60)+'...' : '(none)'}`);
     
@@ -886,7 +909,9 @@ async function fetchViaAllOrigins(rssUrl){
 
 // 方法2: rss2json APIをフォールバックとして使用
 async function fetchViaRss2Json(rssUrl){
-  const res = await fetch(CORS_PROXIES[1] + encodeURIComponent(rssUrl));
+  const url = EXTERNAL_PROXIES[1] + encodeURIComponent(rssUrl);
+  console.log('[AVA Blog] Trying rss2json:', url);
+  const res = await fetch(url);
   if(!res.ok) throw new Error('rss2json fetch failed');
   const data = await res.json();
   if(!data.items || !data.items.length) throw new Error('No items');
@@ -944,21 +969,27 @@ async function loadTopics(){
   let items = [];
   
   try {
-    // まずalloriginsで直接パースを試みる（画像データが完全に取得できる）
-    items = await fetchViaAllOrigins(rssUrl);
+    // まず自前プロキシで取得（同一ドメインなのでCORS問題なし）
+    items = await fetchViaSelfProxy(rssUrl);
   } catch(e1){
-    console.warn('allorigins failed, trying rss2json:', e1.message);
+    console.warn('[AVA Blog] Self-proxy failed:', e1.message);
     try {
-      // フォールバック: rss2json
-      items = await fetchViaRss2Json(rssUrl);
+      // フォールバック1: allorigins
+      items = await fetchViaAllOrigins(rssUrl);
     } catch(e2){
-      console.error('Both RSS methods failed:', e2.message);
-      grid.innerHTML = `
-        <div class="topic-error">
-          ブログ記事を読み込めませんでした<br>
-          <a href="${BLOG_URL}" class="topic-link" target="_blank" rel="noopener">ブログを直接見る</a>
-        </div>`;
-      return;
+      console.warn('[AVA Blog] allorigins failed:', e2.message);
+      try {
+        // フォールバック2: rss2json（画像は取れないが記事一覧は出る）
+        items = await fetchViaRss2Json(rssUrl);
+      } catch(e3){
+        console.error('[AVA Blog] All methods failed:', e3.message);
+        grid.innerHTML = `
+          <div class="topic-error">
+            ブログ記事を読み込めませんでした<br>
+            <a href="${BLOG_URL}" class="topic-link" target="_blank" rel="noopener">ブログを直接見る</a>
+          </div>`;
+        return;
+      }
     }
   }
   

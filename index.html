@@ -842,7 +842,8 @@ async function loadTopics(){
       const HATENA_DEFAULT_PATTERNS = [
         'cdn.blog.st-hatena.com/images/theme',
         'cdn.blog.st-hatena.com/images/admin/blog-icon-noimage',
-        'cdn.profile-image.st-hatena.com'
+        'cdn.profile-image.st-hatena.com',
+        'ogimage.blog.st-hatena.com'  // はてなブログの自動生成タイトルカード画像を除外
       ];
       const isHatenaDefault = (url) => {
         if(!url) return true;

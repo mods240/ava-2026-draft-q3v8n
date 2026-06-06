@@ -795,111 +795,24 @@ const BLOG_URL = 'https://avakobe.hatenablog.com'; // AVA公式ブログ
 // 表示する最大件数
 const MAX_ITEMS = 5;
 
-// RSS→JSON変換プロキシ（CORS回避のため）
-const PROXY = 'https://api.rss2json.com/v1/api.json?rss_url=';
+// CORSプロキシ（ブラウザから外部RSSを取得するために必要）
+const CORS_PROXIES = [
+  'https://api.allorigins.win/get?url=',
+  'https://api.rss2json.com/v1/api.json?rss_url='
+];
 
-async function loadTopics(){
-  const grid = document.getElementById('topicsGrid');
-  const allLink = document.getElementById('blogAllLink');
-  const rssUrl = BLOG_URL.replace(/\/$/, '') + '/rss';
-  
-  // 「VIEW ALL」のリンク先をブログTOPに設定
-  allLink.href = BLOG_URL;
-  allLink.target = '_blank';
-  allLink.rel = 'noopener';
-  
-  try {
-    const res = await fetch(PROXY + encodeURIComponent(rssUrl));
-    if(!res.ok) throw new Error('RSS取得に失敗しました');
-    const data = await res.json();
-    
-    if(!data.items || data.items.length === 0){
-      grid.innerHTML = `
-        <div class="topic-error">
-          まだ記事がありません。<br>
-          <a href="${BLOG_URL}" class="topic-link" target="_blank" rel="noopener">ブログを見る</a>
-        </div>`;
-      return;
-    }
+// はてなブログのデフォルト画像を除外するパターン
+const HATENA_DEFAULT_PATTERNS = [
+  'cdn.blog.st-hatena.com/images/theme',
+  'cdn.blog.st-hatena.com/images/admin/blog-icon-noimage',
+  'cdn.profile-image.st-hatena.com',
+  'ogimage.blog.st-hatena.com',
+  'cdn.blog.st-hatena.com/images/admin/quote'
+];
 
-    const items = data.items.slice(0, MAX_ITEMS);
-    
-    grid.innerHTML = items.map((item, i) => {
-      const date = new Date(item.pubDate);
-      const dateStr = `${date.getFullYear()}.${String(date.getMonth()+1).padStart(2,'0')}.${String(date.getDate()).padStart(2,'0')}`;
-      
-      // 本文プレビュー生成（HTMLタグ除去）
-      const plainText = (item.description || item.content || '')
-        .replace(/<[^>]+>/g, '')
-        .replace(/\s+/g, ' ')
-        .trim();
-      const previewLen = i === 0 ? 180 : 80; // 1枚目（大）は長め
-      const preview = plainText.substring(0, previewLen) + (plainText.length > previewLen ? '…' : '');
-      
-      // サムネイル画像を取得
-      // 優先順位: 1. 記事本文中の最初の<img> → 2. RSSのthumbnail → 3. RSSのenclosure
-      // ただし、はてなブログのデフォルトロゴ画像は除外する
-      const HATENA_DEFAULT_PATTERNS = [
-        'cdn.blog.st-hatena.com/images/theme',
-        'cdn.blog.st-hatena.com/images/admin/blog-icon-noimage',
-        'cdn.profile-image.st-hatena.com',
-        'ogimage.blog.st-hatena.com'  // はてなブログの自動生成タイトルカード画像を除外
-      ];
-      const isHatenaDefault = (url) => {
-        if(!url) return true;
-        return HATENA_DEFAULT_PATTERNS.some(p => url.includes(p));
-      };
-      
-      // 本文中のすべての<img>を探して、はてなデフォルト以外で最初のものを選ぶ
-      const imgMatches = [...(item.description || item.content || '').matchAll(/<img[^>]+src="([^"]+)"/g)];
-      const bodyImg = imgMatches.map(m => m[1]).find(url => !isHatenaDefault(url));
-      
-      // 候補を優先順位で評価
-      let thumb = '';
-      if(bodyImg) thumb = bodyImg;
-      else if(item.thumbnail && !isHatenaDefault(item.thumbnail)) thumb = item.thumbnail;
-      else if(item.enclosure?.link && !isHatenaDefault(item.enclosure.link)) thumb = item.enclosure.link;
-      
-      const thumbStyle = thumb 
-        ? `style="background-image:url('${thumb}')"` 
-        : '';
-      
-      // タグ判定（カテゴリーから種別を推測）
-      const categories = item.categories || [];
-      let tagLabel = 'POST';
-      const catStr = categories.join(' ').toLowerCase();
-      if(catStr.includes('news') || catStr.includes('お知らせ')) tagLabel = 'NEWS';
-      else if(catStr.includes('event') || catStr.includes('イベント')) tagLabel = 'EVENT';
-      else if(catStr.includes('youtube') || catStr.includes('動画')) tagLabel = 'VIDEO';
-      else if(catStr.includes('twitter') || catStr.includes('x')) tagLabel = 'X POST';
-      else if(catStr.includes('recruit') || catStr.includes('採用')) tagLabel = 'RECRUIT';
-      
-      // 1枚目を大きく表示
-      const cardClass = i === 0 ? 'topic-card featured' : 'topic-card';
-      
-      return `
-        <a href="${item.link}" target="_blank" rel="noopener" class="${cardClass}">
-          ${thumb ? `<div class="topic-thumb" ${thumbStyle}></div>` : ''}
-          <div class="topic-body">
-            <div class="topic-meta-row">
-              <span class="topic-tag">${tagLabel}</span>
-              <span class="topic-date">${dateStr}</span>
-            </div>
-            <h3>${escapeHtml(item.title)}</h3>
-            <p>${escapeHtml(preview)}</p>
-            <span class="topic-link">記事を読む</span>
-          </div>
-        </a>
-      `;
-    }).join('');
-  } catch(err){
-    console.error('Blog RSS Error:', err);
-    grid.innerHTML = `
-      <div class="topic-error">
-        ブログ記事を読み込めませんでした<br>
-        <a href="${BLOG_URL}" class="topic-link" target="_blank" rel="noopener">ブログを直接見る</a>
-      </div>`;
-  }
+function isHatenaDefault(url){
+  if(!url) return true;
+  return HATENA_DEFAULT_PATTERNS.some(p => url.includes(p));
 }
 
 // HTMLエスケープ（XSS対策）
@@ -908,7 +821,166 @@ function escapeHtml(text){
   return String(text).replace(/[&<>"']/g, m => map[m]);
 }
 
-// ページロード時に実行
+// XMLからテキスト取得ヘルパー
+function getTagText(el, tag){
+  // 名前空間付きタグ(content:encoded等)にも対応
+  const found = el.getElementsByTagName(tag)[0];
+  return found ? (found.textContent || '') : '';
+}
+
+// 方法1: alloriginsでRSS XMLを直接取得してパース
+async function fetchViaAllOrigins(rssUrl){
+  const res = await fetch(CORS_PROXIES[0] + encodeURIComponent(rssUrl));
+  if(!res.ok) throw new Error('allorigins fetch failed');
+  const data = await res.json();
+  if(!data.contents) throw new Error('allorigins empty');
+  
+  const parser = new DOMParser();
+  const xml = parser.parseFromString(data.contents, 'text/xml');
+  const xmlItems = xml.querySelectorAll('item');
+  if(!xmlItems.length) throw new Error('No items in RSS');
+  
+  const items = [];
+  xmlItems.forEach(el => {
+    // content:encoded（全文HTML）を優先、なければdescription
+    const content = getTagText(el, 'content:encoded') || getTagText(el, 'encoded') || getTagText(el, 'description');
+    const link = getTagText(el, 'link');
+    const title = getTagText(el, 'title');
+    const pubDate = getTagText(el, 'pubDate') || getTagText(el, 'dc:date');
+    
+    // カテゴリーを収集
+    const categories = [];
+    el.querySelectorAll('category').forEach(c => categories.push(c.textContent || ''));
+    
+    items.push({ title, link, pubDate, content, categories });
+  });
+  return items;
+}
+
+// 方法2: rss2json APIをフォールバックとして使用
+async function fetchViaRss2Json(rssUrl){
+  const res = await fetch(CORS_PROXIES[1] + encodeURIComponent(rssUrl));
+  if(!res.ok) throw new Error('rss2json fetch failed');
+  const data = await res.json();
+  if(!data.items || !data.items.length) throw new Error('No items');
+  
+  return data.items.map(item => ({
+    title: item.title,
+    link: item.link,
+    pubDate: item.pubDate,
+    content: item.content || item.description || '',
+    categories: item.categories || []
+  }));
+}
+
+// 記事本文HTMLからサムネイル画像URLを抽出
+function extractThumb(htmlContent){
+  if(!htmlContent) return '';
+  
+  // src="..." と src='...' の両方に対応、data-src も確認
+  const patterns = [
+    /<img[^>]+src="([^"]+)"/gi,
+    /<img[^>]+src='([^']+)'/gi,
+    /<img[^>]+data-src="([^"]+)"/gi
+  ];
+  
+  for(const pattern of patterns){
+    const matches = [...htmlContent.matchAll(pattern)];
+    for(const match of matches){
+      const url = match[1];
+      if(!isHatenaDefault(url) && !url.includes('.svg') && !url.includes('data:image')){
+        return url;
+      }
+    }
+  }
+  return '';
+}
+
+async function loadTopics(){
+  const grid = document.getElementById('topicsGrid');
+  const allLink = document.getElementById('blogAllLink');
+  const rssUrl = BLOG_URL.replace(/\/$/, '') + '/rss';
+  
+  allLink.href = BLOG_URL;
+  allLink.target = '_blank';
+  allLink.rel = 'noopener';
+  
+  let items = [];
+  
+  try {
+    // まずalloriginsで直接パースを試みる（画像データが完全に取得できる）
+    items = await fetchViaAllOrigins(rssUrl);
+  } catch(e1){
+    console.warn('allorigins failed, trying rss2json:', e1.message);
+    try {
+      // フォールバック: rss2json
+      items = await fetchViaRss2Json(rssUrl);
+    } catch(e2){
+      console.error('Both RSS methods failed:', e2.message);
+      grid.innerHTML = `
+        <div class="topic-error">
+          ブログ記事を読み込めませんでした<br>
+          <a href="${BLOG_URL}" class="topic-link" target="_blank" rel="noopener">ブログを直接見る</a>
+        </div>`;
+      return;
+    }
+  }
+  
+  if(!items.length){
+    grid.innerHTML = `
+      <div class="topic-error">
+        まだ記事がありません。<br>
+        <a href="${BLOG_URL}" class="topic-link" target="_blank" rel="noopener">ブログを見る</a>
+      </div>`;
+    return;
+  }
+  
+  items = items.slice(0, MAX_ITEMS);
+  
+  grid.innerHTML = items.map((item, i) => {
+    const date = new Date(item.pubDate);
+    const dateStr = isNaN(date) ? '' : `${date.getFullYear()}.${String(date.getMonth()+1).padStart(2,'0')}.${String(date.getDate()).padStart(2,'0')}`;
+    
+    // 本文プレビュー生成
+    const plainText = (item.content || '')
+      .replace(/<[^>]+>/g, '')
+      .replace(/\s+/g, ' ')
+      .trim();
+    const previewLen = i === 0 ? 180 : 80;
+    const preview = plainText.substring(0, previewLen) + (plainText.length > previewLen ? '…' : '');
+    
+    // サムネイル画像を本文HTMLから抽出
+    const thumb = extractThumb(item.content);
+    const thumbStyle = thumb ? `style="background-image:url('${thumb}')"` : '';
+    
+    // タグ判定
+    const catStr = (item.categories || []).join(' ').toLowerCase();
+    let tagLabel = 'POST';
+    if(catStr.includes('news') || catStr.includes('お知らせ')) tagLabel = 'NEWS';
+    else if(catStr.includes('event') || catStr.includes('イベント')) tagLabel = 'EVENT';
+    else if(catStr.includes('youtube') || catStr.includes('動画')) tagLabel = 'VIDEO';
+    else if(catStr.includes('twitter') || catStr.includes('x')) tagLabel = 'X POST';
+    else if(catStr.includes('recruit') || catStr.includes('採用')) tagLabel = 'RECRUIT';
+    
+    const cardClass = i === 0 ? 'topic-card featured' : 'topic-card';
+    
+    return `
+      <a href="${item.link}" target="_blank" rel="noopener" class="${cardClass}">
+        ${thumb ? `<div class="topic-thumb" ${thumbStyle}></div>` : ''}
+        <div class="topic-body">
+          <div class="topic-meta-row">
+            <span class="topic-tag">${tagLabel}</span>
+            <span class="topic-date">${dateStr}</span>
+          </div>
+          <h3>${escapeHtml(item.title)}</h3>
+          <p>${escapeHtml(preview)}</p>
+          <span class="topic-link">記事を読む</span>
+        </div>
+      </a>
+    `;
+  }).join('');
+}
+
 loadTopics();
 </script>
 

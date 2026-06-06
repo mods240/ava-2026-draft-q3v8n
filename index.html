@@ -274,7 +274,7 @@ nav{
 .services .section-jp{color:var(--mute)}
 .services-list{display:flex;flex-direction:column}
 .service-row{
-  display:grid;grid-template-columns:80px 1.2fr 2fr 200px;
+  display:grid;grid-template-columns:80px 1.2fr 2fr;
   gap:40px;padding:40px 0;border-bottom:1px solid var(--line-dark);
   align-items:center;cursor:pointer;transition:all .4s;
   position:relative;
@@ -287,10 +287,6 @@ nav{
 .service-name{font-size:32px;font-weight:800;font-family:'Shippori Mincho',serif}
 .service-en{font-size:11px;color:var(--mute);letter-spacing:.3em;display:block;margin-top:6px}
 .service-desc{font-size:14px;color:#3a4a5a;line-height:1.9}
-.service-arrow{
-  text-align:right;font-family:'Anton',sans-serif;
-  font-size:14px;color:var(--cyan);letter-spacing:.2em;
-}
 
 /* ===== STATS / IMPACT ===== */
 .impact{padding:120px 60px;background:var(--ink);position:relative;overflow:hidden}
@@ -458,7 +454,7 @@ footer{padding:80px 60px 40px;background:var(--ink);border-top:1px solid var(--l
   .impact-grid{grid-template-columns:repeat(2,1fr);gap:30px}
   .stat-num{font-size:60px}
   .service-row{grid-template-columns:50px 1fr;gap:16px}
-  .service-row > .service-desc,.service-row > .service-arrow{display:none}
+  .service-row > .service-desc{display:none}
   .section-head{flex-direction:column;align-items:flex-start;gap:12px}
   .footer-grid{grid-template-columns:1fr;gap:40px}
   .contact-grid{grid-template-columns:1fr}
@@ -566,7 +562,6 @@ footer{padding:80px 60px 40px;background:var(--ink);border-top:1px solid var(--l
         <span class="service-en">EVENT TECHNICAL</span>
       </div>
       <div class="service-desc">展示会・企業イベントの映像/音響オペレーション。株主総会、プレス発表、表彰式、記念式典、プライベートショー、カメラ中継システム、ブース設計・施工まで一貫対応。</div>
-      <div class="service-arrow">VIEW →</div>
     </div>
 
     <div class="service-row">
@@ -576,7 +571,6 @@ footer{padding:80px 60px 40px;background:var(--ink);border-top:1px solid var(--l
         <span class="service-en">VIDEO CONTENTS</span>
       </div>
       <div class="service-desc">TV番組制作、TV/ラジオCMの企画制作、企業VP、商品販促コンテンツ、YouTubeなどSNS動画・縦型コンテンツまで、企画から納品まで。</div>
-      <div class="service-arrow">VIEW →</div>
     </div>
 
     <div class="service-row">
@@ -586,17 +580,24 @@ footer{padding:80px 60px 40px;background:var(--ink);border-top:1px solid var(--l
         <span class="service-en">AVC SYSTEM DEV</span>
       </div>
       <div class="service-desc">博物館・科学館・学校・百貨店・展示館・ショールーム・会議室の映像/音響/コンピュータシステム施工。インタラクティブコンテンツ制御の企画・設計・販売。</div>
-      <div class="service-arrow">VIEW →</div>
     </div>
 
     <div class="service-row">
       <div class="service-num">04</div>
       <div>
-        <div class="service-name">LEDレンタル</div>
-        <span class="service-en">LED RENTAL — NEW</span>
+        <div class="service-name">展示会ブース・デザイン造作</div>
+        <span class="service-en">BOOTH DESIGN &amp; BUILD</span>
       </div>
-      <div class="service-desc">最大300インチ、−15°〜+15°の曲面設置対応の高詳細屋内LEDビジョン。記憶に残る空間演出を、最新鋭の機材で。</div>
-      <div class="service-arrow">VIEW →</div>
+      <div class="service-desc">記録した情報を扱うだけでなく、その舞台となる造作物の企画・制作も行なっています。目的をデザインに落とし込み、規模に応じた造作物を作成。大きなものから小さなものまで、そのシーンをつくる細部にまで対応いたします。</div>
+    </div>
+
+    <div class="service-row">
+      <div class="service-num">05</div>
+      <div>
+        <div class="service-name">レンタル業務</div>
+        <span class="service-en">EQUIPMENT RENTAL</span>
+      </div>
+      <div class="service-desc">大型LED（最大300インチに対応）、イベントから展示まで設営・対応いたします。基本的に機材だけのレンタルは行っておらず、ノウハウを持つスタッフが搬入・設営を行います。</div>
     </div>
   </div>
 </section>

@@ -79,28 +79,28 @@ nav{
 .hero-bg-slide{
   position:absolute;inset:-20px;
   background-size:cover;background-position:center;
-  filter:blur(6px);
+  filter:blur(4px);
   opacity:0;
-  transition:opacity 2s ease;
+  transition:opacity 1.5s ease;
 }
-.hero-bg-slide.active{opacity:.45}
+.hero-bg-slide.active{opacity:.6}
 .hero-bg-overlay{
   position:absolute;inset:0;
   background:
-    radial-gradient(ellipse at 20% 30%, rgba(29,161,242,.3) 0%, transparent 50%),
-    radial-gradient(ellipse at 80% 70%, rgba(111,192,245,.12) 0%, transparent 50%),
-    linear-gradient(180deg, rgba(14,20,25,.55) 0%, rgba(20,24,30,.75) 100%);
+    radial-gradient(ellipse at 20% 30%, rgba(29,161,242,.25) 0%, transparent 50%),
+    radial-gradient(ellipse at 80% 70%, rgba(111,192,245,.1) 0%, transparent 50%),
+    linear-gradient(180deg, rgba(14,20,25,.45) 0%, rgba(20,24,30,.65) 100%);
   z-index:1;
 }
 .hero-grid{
-  position:absolute;inset:0;
+  position:absolute;inset:0;z-index:2;
   background-image:
     linear-gradient(rgba(29,161,242,.07) 1px,transparent 1px),
     linear-gradient(90deg,rgba(29,161,242,.07) 1px,transparent 1px);
   background-size:80px 80px;
   mask-image:radial-gradient(ellipse at center,black 30%,transparent 70%);
 }
-.hero-content{position:relative;z-index:2;max-width:1400px;margin:0 auto;width:100%}
+.hero-content{position:relative;z-index:3;max-width:1400px;margin:0 auto;width:100%}
 .hero-tag{
   display:inline-flex;align-items:center;gap:12px;
   font-size:12px;letter-spacing:.3em;color:var(--cyan-light);
@@ -134,7 +134,7 @@ nav{
 .btn-ghost:hover{border-color:var(--cyan-light);color:var(--cyan-light);background:rgba(29,161,242,.05)}
 
 .hero-meta{
-  position:absolute;bottom:40px;left:60px;right:60px;
+  position:absolute;bottom:40px;left:60px;right:60px;z-index:3;
   display:flex;justify-content:space-between;align-items:flex-end;
   font-size:11px;letter-spacing:.3em;color:rgba(244,248,251,.5);
 }
@@ -1204,10 +1204,15 @@ document.querySelectorAll('.work-slider').forEach(slider => {
   if(slides.length < 2) return;
   let current = 0;
   setInterval(() => {
-    slides[current].classList.remove('active');
-    current = (current + 1) % slides.length;
-    slides[current].classList.add('active');
-  }, 5000); // 5秒ごとに切り替え
+    const next = (current + 1) % slides.length;
+    // 次の写真をフェードイン（現在の写真はまだ表示中 = オーバーラップ）
+    slides[next].classList.add('active');
+    // 0.8秒後に前の写真をフェードアウト（重なりの余韻を残す）
+    setTimeout(() => {
+      slides[current].classList.remove('active');
+      current = next;
+    }, 800);
+  }, 3500); // 3.5秒ごとに切り替え
 })();
 
 // ===== Service Accordion (Mobile) =====

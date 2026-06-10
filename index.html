@@ -7,6 +7,14 @@
   <!-- TODO: 本番公開時に下記noindex行を削除すること -->
   <meta name="robots" content="noindex, nofollow">
 <link rel="preconnect" href="https://fonts.googleapis.com">
+<!-- Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-2NF28TVDXX"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-2NF28TVDXX');
+</script>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@400;500;700;800&family=Noto+Sans+JP:wght@300;400;500;700&family=Anton&display=swap" rel="stylesheet">
 <style>
@@ -698,7 +706,22 @@ footer{padding:80px 60px 40px;background:var(--ink);border-top:1px solid var(--l
 
   <div class="works-grid">
     <div class="work-card">
-      <div class="work-bg">EXPO</div>
+      <div class="work-slider" id="expoSlider">
+        <div class="work-slide" style="background-image:url('img/expo/expo202600001.jpeg')"></div>
+        <div class="work-slide" style="background-image:url('img/expo/expo202600002.jpeg')"></div>
+        <div class="work-slide" style="background-image:url('img/expo/expo202600003.jpeg')"></div>
+        <div class="work-slide" style="background-image:url('img/expo/expo202600004.jpeg')"></div>
+        <div class="work-slide" style="background-image:url('img/expo/expo202600005.jpeg')"></div>
+        <div class="work-slide" style="background-image:url('img/expo/expo202600006.jpeg')"></div>
+      </div>
+      <div class="work-dots" id="expoDots">
+        <div class="work-dot active" data-index="0"></div>
+        <div class="work-dot" data-index="1"></div>
+        <div class="work-dot" data-index="2"></div>
+        <div class="work-dot" data-index="3"></div>
+        <div class="work-dot" data-index="4"></div>
+        <div class="work-dot" data-index="5"></div>
+      </div>
       <div class="work-overlay">
         <span class="work-cat">EXPO</span>
         <div>
